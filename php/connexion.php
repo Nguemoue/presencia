@@ -5,7 +5,7 @@ require_once '../includes/config.php'; // Inclusion du fichier de connexion PDO
 
 
 // Récupération et filtrage des données POST
-$matricule = filter_input(INPUT_POST, 'matricule', FILTER_SANITIZE_STRING);
+$matricule = $_POST['matricule'];
 $password = $_POST['password'] ;
 $role = $_POST['role'] ;
 

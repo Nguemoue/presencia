@@ -1,57 +1,52 @@
 <?php
 session_start();
-require_once '../includes/config.php';
-$data = json_decode(file_get_contents('php://input'), true);
+header("Content-Type: application/json");
 
-$imageData = $data['image'];
+$data = json_decode(file_get_contents("php://input"), true);
 
-if(!$imageData){
- echo json_encode("EMpty image");
+if(!$data || !isset($data['image'])) {
+    echo json_encode(["success" => false, "message" => "Aucune image reçue"]);
+    exit;
 }
 
-if (!isset($_SESSION['user_id'])) {
-  echo json_encode([ "success" => false, "message" => "Vous devez être connecté(e)." ]);
-  exit;
+// Extraire l'image base64
+$imgData = $data['image'];
+$imgData = str_replace(array('data:image/jpeg;base64,', ' '), array('', '+'), $imgData);
+$decoded = base64_decode($imgData);
+
+if(!$decoded) {
+    echo json_encode(["success" => false, "message" => "Impossible de décoder l'image"]);
+    exit;
 }
-$user_id = $_SESSION['user_id'];
+$userId = $_SESSION['user_id'];
 
-// Appel à l'API Python pour reconnaissance faciale (à développer)
-$response = file_get_contents("http://127.0.0.1:500/face_recognition", false, stream_context_create([
-  "http" => [
-    "method"=>"POST",
-    "header"=>"Content-Type: application/json",
-    "content" => json_encode([ "user_id"=>$user_id, "image"=>$imageData ])
-  ]
-]));
-$faceResult = json_decode($response,true);
+// Sauvegarder temporairement l’image
+$tmpFile = sys_get_temp_dir() . "/capture_".uniqid().".jpg";
+file_put_contents($tmpFile, $decoded);
 
-if(!$faceResult['success']){
-  echo json_encode([ "success"=>false, "message"=>"Reconnaissance faciale échouée ou non reconnue." ]);
-  exit;
+// Appeler ton service Flask (par ex. http://127.0.0.1:5000/recognize)
+$ch = curl_init("http://127.0.0.1:5000/recognize");
+$cfile = new CURLFile($tmpFile, "image/jpeg", basename($tmpFile));
+$postData = ['file' => $cfile,'user_id'=>$userId];
+
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+
+$response = curl_exec($ch);
+$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+// Supprimer le fichier temporaire
+unlink($tmpFile);
+
+if($httpcode === 200 && $response) {
+    $res = json_decode($response, true);
+    if(isset($res['match']) && $res['match'] === true) {
+        echo json_encode(["success" => true, "date" => date("Y-m-d H:i:s"), "person" => $res['person']]);
+    } else {
+        echo json_encode(["success" => false, "message" => "Visage non reconnu"]);
+    }
+} else {
+    echo json_encode(["success" => false, "message" => "Erreur API reconnaissance"]);
 }
-
-// Limitation une fois par jour
-$periode = date('Y-m-d');
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM presence WHERE id_user = ? AND periode = ?");
-$stmt->execute([$user_id,$periode]);
-$count = $stmt->fetchColumn();
-$limite = 2;
-if($count >= $limite){
-  echo json_encode([ "success"=>false, "message"=>"Tu as déjà pointé ta présence aujourd'hui !" ]);
-  exit;
-}
-
-// Sauvegarde de l'image pour archive
-function saveImage($base64img){
-  $base64img = explode(',', $base64img)[1];
-  $file = 'uploads/pointage_' . uniqid() . '.jpg';
-  file_put_contents('../' . $file, base64_decode($base64img));
-  return $file;
-}
-
-// Enregistrement
-$stmt = $pdo->prepare("INSERT INTO presence (user_id, date_heure, id_periode, image_reference, statut) VALUES (?,NOW(),?,?,?)");
-$stmt->execute([$user_id, $periode, saveImage($imageData), 'valide']);
-
-echo json_encode([ "success"=>true, "date"=>date('d/m/Y H:i:s') ]);
-?>

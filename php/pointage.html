@@ -1,55 +1,99 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Pointage des présences</title>
-  <style>
-    body { font-family:Arial,sans-serif; background:#f6f6ef; text-align:center; }
-    .card { max-width:400px; margin:2rem auto; background:#fff; border-radius:18px; box-shadow:0 8px 30px #b1a10622; padding:2rem; }
-    video { border:2px solid #d9e76c; border-radius:10px; }
-    .feedback { font-size:1.2rem; margin:1.3rem 0 0; }
-    .success { color:#29a329; }
-    .error { color:#d9534f; }
-    button { margin:1rem; padding:10px 24px; background:#d9e76c; border:none; border-radius:40px; font-size:1.1rem; font-weight:bold; cursor:pointer;}
-    button:hover { background:#f0d78c; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Pointage des présences</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f6f6ef;
+            text-align: center;
+        }
+
+        .card {
+            max-width: 420px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px #b1a10622;
+            padding: 2rem;
+        }
+
+        video, canvas {
+            border: 2px solid #d9e76c;
+            border-radius: 10px;
+        }
+
+        .feedback {
+            font-size: 1.2rem;
+            margin: 1.3rem 0 0;
+            min-height: 40px;
+        }
+
+        .success {
+            color: #29a329;
+        }
+
+        .error {
+            color: #d9534f;
+        }
+
+        button {
+            margin: 1rem;
+            padding: 10px 24px;
+            background: #d9e76c;
+            border: none;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #f0d78c;
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
+<div class="card">
     <h2>Présence - Identification faciale</h2>
     <video id="webcam" autoplay playsinline width="320" height="240"></video>
     <canvas id="capture" width="320" height="240" style="display:none;"></canvas>
     <br>
     <button id="btnCapture">Pointer ma présence</button>
     <div id="result" class="feedback"></div>
-  </div>
-<script>
-const video = document.getElementById('webcam');
-const canvas = document.getElementById('capture');
-navigator.mediaDevices.getUserMedia({video:true})
-  .then(s => video.srcObject = s)
-  .catch(() => document.getElementById('result').textContent='Erreur accès caméra');
+</div>
 
-document.getElementById('btnCapture').onclick = function() {
-  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-  const imgData = canvas.toDataURL('image/jpeg');
-  document.getElementById('result').textContent = 'Analyse et validation en cours...';
-  fetch("/presencia/php/api_pointage.php", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ image: imgData })
-  })
-    .then(r => r.json())
-    .then(res => {
-      if(res.success) {
-        document.getElementById('result').innerHTML = "<span class='success'>Présence validée<br>"+res.date+"</span>";
-      } else {
-        document.getElementById('result').innerHTML = "<span class='error'>"+res.message+"</span>";
-      }
-    })
-    .catch(() => document.getElementById('result').textContent='Erreur serveur');
-};
+<script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('capture');
+    const result = document.getElementById('result');
+
+    navigator.mediaDevices.getUserMedia({video: true})
+        .then(s => video.srcObject = s)
+        .catch(() => result.textContent = 'Erreur : accès à la caméra refusé.');
+
+    document.getElementById('btnCapture').onclick = function () {
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imgData = canvas.toDataURL('image/jpeg');
+
+        result.textContent = ' Analyse et validation en cours...';
+
+        fetch("api_pointage.php", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({image: imgData})
+        })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    result.innerHTML = "<span class='success'>✅ Présence validée<br>" + res.date + "</span>";
+                } else {
+                    result.innerHTML = "<span class='error'>❌ " + res.message + "</span>";
+                }
+            })
+            .catch(() => result.innerHTML = '<span class="error">❌ Erreur serveur</span>');
+    };
 </script>
 </body>
 </html>

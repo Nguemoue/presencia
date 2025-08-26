@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accueil - Gestion de Présence Universitaire</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <label class="toggle-switch" title="Basculer mode clair/sombre">
+    <input type="checkbox" id="modeToggle" />
+    Mode sombre
+  </label>
+      <section class="left-pane fade-in">
+    <div class="container">
+  <header class="fade-in">
+    <h1>Gestion de Présence Universitaire</h1>
+    <p class="slogan">
+      Optimisez la gestion des présences avec notre solution numérique intelligente, rapide et sécurisée. Cette application vous offre une interface intuitive pour 
+      enregistrer,suivre et analyser les presences des etudiants et du personnel de l'IAI CAMEROUN   
+</p>
+  </header>
+  <main class="fade-in" style="animation-delay: 0.3s;">
+    <button class="btn-connexion" id="btnConnexion" aria-label="Accéder à la page de connexion">
+      Se connecter
+    </button>
+  </main>
+      </section>
+
+    <section class="right-pane fade-in">
+      <img src="assets/img/iai2.png" alt="Image universitaire" />
+    </section>
+  </div>
+
+
+  <script src="assets/js/app.js"></script>
+  <script>
+    // Redirection vers la page de connexion
+    document.getElementById('btnConnexion').addEventListener('click', () => {
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

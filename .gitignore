@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.env
+venv/
+env/
+
+# pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Node.js / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+
+# PHP
+vendor/
+composer.lock
+.env
+
+# C / C++
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.out
+*.a
+*.lib
+*.class
+
+# SQL dumps
+*.sql
+*.sqlite
+
+# IDEs and editors
+.idea/
+*.sublime-workspace
+*.sublime-project
+.vscode/
+*.iml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,2 @@
+pour lancer le projet entrer dans la racine du projet et ecrire cmd dans la barre de recherche du projet
+ensuite taper la commande run.bat pour ouvrir le projet

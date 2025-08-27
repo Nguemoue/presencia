@@ -61,7 +61,7 @@ tr:hover { background:#f1f1f1; }
 <main>
 <div class="form-container" style="max-width:1100px;">
     <h2>Liste des utilisateurs</h2>
-    <a href="ajout_u.php">
+    <a href="ajouter_utilisateur.php">
         <button id="btnAddUser" class="btn-connexion" style="margin-bottom:1rem;">Ajouter un utilisateur</button>
     </a>
 

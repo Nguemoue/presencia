@@ -4,26 +4,26 @@ require_once '../includes/config.php'; // contient $pdo (connexion PDO)
 $message = null;
 
 // Limites & formats image
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 Mo
-const ALLOWED_EXT     = ['jpg','jpeg','png'];
-const ALLOWED_MIME    = ['image/jpeg','image/png'];
+define('MAX_IMAGE_BYTES', 5 * 1024 * 1024); // 5 Mo
+$ALLOWED_EXT = array('jpg', 'jpeg', 'png');
+$ALLOWED_MIME = array('image/jpeg', 'image/png');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Récupération & nettoyage
-    $nom          = trim($_POST['nom'] ?? '');
-    $prenom       = trim($_POST['prenom'] ?? '');
-    $email        = trim($_POST['email'] ?? '');
-    $matricule    = trim($_POST['matricule'] ?? '');
-    $type         = $_POST['type'] ?? '';
-    $classe_id    = $_POST['classe_id'] ?? '';
-    $mot_de_passe = $_POST['mot_de_passe'] ?? '';
+    $nom          = isset($_POST['nom']) ? trim($_POST['nom']) : '';
+    $prenom       = isset($_POST['prenom']) ? trim($_POST['prenom']) : '';
+    $email        = isset($_POST['email']) ? trim($_POST['email']) : '';
+    $matricule    = isset($_POST['matricule']) ? trim($_POST['matricule']) : '';
+    $type         = isset($_POST['type']) ? $_POST['type'] : '';
+    $classe_id    = isset($_POST['classe_id']) ? $_POST['classe_id'] : '';
+    $mot_de_passe = isset($_POST['mot_de_passe']) ? $_POST['mot_de_passe'] : '';
 
     // Validation
     if (
         $nom && $prenom &&
         filter_var($email, FILTER_VALIDATE_EMAIL) &&
         $matricule && $mot_de_passe &&
-        in_array($type, ['etudiant','personnel','admin'], true) &&
+        in_array($type, array('etudiant','personnel','admin')) &&
         is_numeric($classe_id)
     ) {
         $hashedPassword = password_hash($mot_de_passe, PASSWORD_BCRYPT);
@@ -34,21 +34,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // --- Gestion de la photo (facultative) ---
         if ($hasPhoto) {
-            // Taille
             if ($_FILES['photo_reference']['size'] <= 0 || $_FILES['photo_reference']['size'] > MAX_IMAGE_BYTES) {
                 $message = "⚠️ Image trop volumineuse (max 5MB).";
             } else {
                 $ext = strtolower(pathinfo($_FILES['photo_reference']['name'], PATHINFO_EXTENSION));
-                if (!in_array($ext, ALLOWED_EXT, true)) {
+                if (!in_array($ext, $ALLOWED_EXT)) {
                     $message = "⚠️ Format de photo invalide (jpg, jpeg, png uniquement).";
                 } else {
-                    // Mime réel
                     $finfo = new finfo(FILEINFO_MIME_TYPE);
                     $mime  = $finfo->file($_FILES['photo_reference']['tmp_name']);
-                    if (!in_array($mime, ALLOWED_MIME, true)) {
+                    if (!in_array($mime, $ALLOWED_MIME)) {
                         $message = "⚠️ Type de contenu invalide (JPEG/PNG uniquement).";
                     } else {
-                        // Déplacement en uploads
                         $uploadDir = __DIR__ . '/../uploads/';
                         if (!is_dir($uploadDir)) {
                             @mkdir($uploadDir, 0777, true);
@@ -65,14 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$message) {
             try {
-                // 1) Insertion en base (sans transaction)
-                $stmt = $pdo->prepare("
-                    INSERT INTO users
-                      (nom, prenom, email, matricule, mot_de_passe, type, classe_id, photo_reference, created_at)
-                    VALUES
-                      (:nom, :prenom, :email, :matricule, :pwd, :type, :classe_id, :photo, NOW())
-                ");
-                $stmt->execute([
+                $stmt = $pdo->prepare("INSERT INTO users (nom, prenom, email, matricule, mot_de_passe, type, classe_id, photo_reference, created_at)
+                    VALUES (:nom, :prenom, :email, :matricule, :pwd, :type, :classe_id, :photo, NOW())");
+                $stmt->execute(array(
                     ':nom'       => $nom,
                     ':prenom'    => $prenom,
                     ':email'     => $email,
@@ -81,58 +73,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':type'      => $type,
                     ':classe_id' => $classe_id,
                     ':photo'     => $photoName
-                ]);
+                ));
 
                 $userId = (int)$pdo->lastInsertId();
 
-                // 2) Si photo fournie → appel Flask /register
                 if ($photoPath) {
-                    $flaskUrl = getenv('FLASK_REGISTER_URL') ?: 'http://127.0.0.1:5000/register';
+                    $flaskUrl = getenv('FLASK_REGISTER_URL');
+                    if (!$flaskUrl) $flaskUrl = 'http://127.0.0.1:5000/register';
 
-                    $ch = curl_init($flaskUrl);
-                    $mimeToSend = mime_content_type($photoPath) ?: 'image/jpeg';
-                    $cfile = new CURLFile($photoPath, $mimeToSend, basename($photoPath));
+                    $mimeToSend = mime_content_type($photoPath);
+                    if (!$mimeToSend) $mimeToSend = 'image/jpeg';
 
-                    // On envoie name (pour Flask), file et (optionnel) user_id si tu veux le stocker côté Python
-                    $postData = [
+                    // Pour PHP 5.6, CURLFile existe, mais avec précaution
+                    $cfile = class_exists('CURLFile') ? new CURLFile($photoPath, $mimeToSend, basename($photoPath)) : '@' . realpath($photoPath);
+
+                    $postData = array(
                         'name'    => $nom . ' ' . $prenom,
                         'user_id' => (string)$userId,
                         'file'    => $cfile
-                    ];
+                    );
 
-                    curl_setopt_array($ch, [
-                        CURLOPT_POST           => true,
-                        CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_POSTFIELDS     => $postData,
-                        CURLOPT_CONNECTTIMEOUT => 5,
-                        CURLOPT_TIMEOUT        => 20,
-                    ]);
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, $flaskUrl);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+                    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 
                     $response = curl_exec($ch);
-                    $httpcode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                     $err      = curl_error($ch);
                     curl_close($ch);
 
                     if ($response === false) {
-                        // rollback applicatif : supprimer l’utilisateur créé
-                        $pdo->prepare("DELETE FROM users WHERE id = :id")->execute([':id' => $userId]);
-                        $message = "❌ Erreur de communication avec le service de reconnaissance. " . ($err ?: '');
+                        $pdo->prepare("DELETE FROM users WHERE id = :id")->execute(array(':id' => $userId));
+                        $message = "❌ Erreur de communication avec le service de reconnaissance. " . ($err ? $err : '');
                     } else {
                         $res = json_decode($response, true);
                         if ($httpcode !== 201 || empty($res['success'])) {
-                            // rollback applicatif : supprimer l’utilisateur créé
-                            $pdo->prepare("DELETE FROM users WHERE id = :id")->execute([':id' => $userId]);
-                            $detail = is_array($res) ? ($res['message'] ?? $res['error'] ?? 'Erreur API Flask') : 'Réponse non valide';
-                            $message = "❌ Échec de l'enregistrement facial : {$detail}";
+                            $pdo->prepare("DELETE FROM users WHERE id = :id")->execute(array(':id' => $userId));
+                            $detail = is_array($res) ? (isset($res['message']) ? $res['message'] : (isset($res['error']) ? $res['error'] : 'Erreur API Flask')) : 'Réponse non valide';
+                            $message = "❌ Échec de l'enregistrement facial : " . $detail;
                         } else {
                             $message = "✅ Utilisateur ajouté et visage encodé avec succès !";
                         }
                     }
                 } else {
-                    // Pas de photo → pas d’appel Flask
                     $message = "✅ Utilisateur ajouté (sans photo faciale).";
                 }
-            } catch (Throwable $e) {
+
+            } catch (Exception $e) {
                 $message = "❌ Erreur lors de l'ajout : " . htmlspecialchars($e->getMessage());
             }
         }
@@ -142,14 +133,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Chargement des classes
-$classes = [];
+$classes = array();
 try {
     $stmt = $pdo->query("SELECT id, nom_classe FROM classes ORDER BY nom_classe ASC");
     $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Throwable $e) {
-    $classes = [];
+} catch (Exception $e) {
+    $classes = array();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -168,7 +160,7 @@ try {
     <div class="form-container">
         <h2>Ajouter un nouvel utilisateur</h2>
         <?php if ($message): ?>
-            <?php $ok = str_starts_with($message, '✅'); ?>
+            <?php $ok = strpos($message, '✅') ==0; ?>
             <div id="message" class="<?= $ok ? 'success' : 'error' ?>">
                 <?= htmlspecialchars($message) ?>
             </div>

@@ -69,6 +69,7 @@
     const canvas = document.getElementById('capture');
     const result = document.getElementById('result');
 
+    console.log(navigator)
     navigator.mediaDevices.getUserMedia({video: true})
         .then(s => video.srcObject = s)
         .catch(() => result.textContent = 'Erreur : accès à la caméra refusé.');

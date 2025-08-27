@@ -38,9 +38,9 @@ if ($user && password_verify($password, $user['mot_de_passe'])) {
     
     // Redirection selon le rôle
    if ($user['type'] === 'etudiant') {
-            header('Location: ../dashboard.html');
+            header('Location: dashboard.html');
    }elseif($user['type'] === 'personnel') {
-            header('Location: ../dashboard.html');
+            header('Location: dashboard.html');
  }elseif($user['type'] === 'admin') {
             header('Location: dashbordAdmin.php');
  }

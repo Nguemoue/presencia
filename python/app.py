@@ -46,57 +46,35 @@ def register_face():
     finally:
         db.close()
 
-
 @app.route("/recognize", methods=["POST"])
 def recognize():
-    """
-    Compare une photo avec le visage encodé d'un utilisateur donné.
-    Requiert : user_id, file (image).
-    """
-    if "file" not in request.files or "user_id" not in request.form:
-        return jsonify({"error": "File and user_id required"}), 400
-
-    try:
-        user_id = int(request.form["user_id"])
-    except ValueError:
-        return jsonify({"error": "user_id must be an integer"}), 400
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files["file"]
+
     img = face_recognition.load_image_file(file)
     encodings = face_recognition.face_encodings(img)
 
-    if not encodings:
+    if len(encodings) == 0:
         return jsonify({"error": "No face detected"}), 400
 
     uploaded_encoding = encodings[0]
 
     db: Session = SessionLocal()
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            return jsonify({"error": "User not found"}), 404
+    #filter where face encoding is not null
+    users = db.query(User).filter(User.face_encoding != None ).all()
 
-        if not user.face_encoding:
-            return jsonify({"error": "No face_encoding stored for this user"}), 400
+    for person in users:
+        stored_encoding = pickle.loads(person.face_encoding)
+        results = face_recognition.compare_faces([stored_encoding], uploaded_encoding)
 
-        stored_encoding = pickle.loads(user.face_encoding)
-        match = face_recognition.compare_faces([stored_encoding], uploaded_encoding)[0]
+        if results[0]:
+            db.close()
+            return jsonify({"match": True, "person": person.nom}), 200
 
-        if match:
-            return jsonify({
-                "match": True,
-                "user": {
-                    "id": user.id,
-                    "nom": user.nom,
-                    "prenom": user.prenom,
-                    "email": user.email,
-                    "type": user.type,
-                    "matricule": user.matricule
-                }
-            }), 200
-        return jsonify({"match": False}), 200
-    finally:
-        db.close()
+    db.close()
+    return jsonify({"match": False}), 200
 
 
 if __name__ == "__main__":

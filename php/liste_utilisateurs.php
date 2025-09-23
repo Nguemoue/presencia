@@ -3,28 +3,32 @@
 session_start();
 require_once '../includes/config.php';
 
-// Récupération des utilisateurs
-$stmt = $pdo->query("SELECT * FROM users ORDER BY nom, prenom");
-$users = $stmt->fetchAll();
-
-// Récupération des classes
+// Récupération des classes (pour les filtres)
 $stmt = $pdo->query("SELECT id, nom_classe FROM classes");
 $all_classes = [];
 foreach ($stmt as $row) {
     $all_classes[$row['id']] = $row['nom_classe'];
 }
 
-function libelles_ids($ids_str, $ref) {
-    if (!$ids_str) return '';
-    $ids = explode(',', $ids_str);
-    $labels = [];
-    foreach ($ids as $id) {
-        $id = trim($id);
-        if (isset($ref[$id])) {
-            $labels[] = $ref[$id];
-        }
-    }
-    return implode(', ', $labels);
+// Récupération des utilisateurs avec jointure sur classes
+$sql = "SELECT u.id, u.nom, u.prenom, u.email, u.matricule, u.type, u.photo_reference, 
+               c.nom_classe
+        FROM users u
+        LEFT JOIN classes c ON c.id = u.classe_id
+        ORDER BY u.nom, u.prenom";
+$stmt = $pdo->query($sql);
+$users = $stmt->fetchAll();
+
+// Calcul des statistiques
+$total_users = count($users);
+$total_admins = 0;
+$total_students = 0;
+$total_staff = 0;
+
+foreach ($users as $user) {
+    if ($user['type'] === 'admin') $total_admins++;
+    elseif ($user['type'] === 'etudiant') $total_students++;
+    elseif ($user['type'] === 'personnel') $total_staff++;
 }
 ?>
 <!DOCTYPE html>
@@ -50,6 +54,25 @@ tr:hover { background:#f1f1f1; }
 #notification { position:fixed;top:20px;right:20px;padding:10px 20px;border-radius:8px;color:#fff;display:none;z-index:999; }
 .no-photo { color:#888;font-style:italic; }
 .filters { display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem; }
+.stats {
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+.stat-card {
+    background: #7eea66ff;
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    float: left;
+    width: 18%;
+    margin-right: 2.666%;
+    margin-bottom: 1rem;
+}
+.stat-card:last-child { margin-right: 0; }
+.stat-number { font-size: 2rem; font-weight: 700; }
+.stat-label { font-size: 0.9rem; opacity: 0.9; }
+.clearfix:after { content: ""; display: table; clear: both; }
 </style>
 </head>
 <body>
@@ -79,9 +102,29 @@ tr:hover { background:#f1f1f1; }
         <select id="filterClasse" class="input">
             <option value="">-- Filtrer par classe/service --</option>
             <?php foreach ($all_classes as $id => $nom): ?>
-                <option value="<?= htmlspecialchars($nom) ?>"><?= htmlspecialchars($nom) ?></option>
+                <option value="<?php echo htmlspecialchars($nom); ?>"><?php echo htmlspecialchars($nom); ?></option>
             <?php endforeach; ?>
         </select>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="stats clearfix">
+        <div class="stat-card">
+            <div class="stat-number"><?php echo $total_users; ?></div>
+            <div class="stat-label">Total Utilisateurs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><?php echo $total_admins; ?></div>
+            <div class="stat-label">Administrateurs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><?php echo $total_students; ?></div>
+            <div class="stat-label">Étudiants</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><?php echo $total_staff; ?></div>
+            <div class="stat-label">Personnel</div>
+        </div>
     </div>
 
     <!-- Tableau -->
@@ -93,7 +136,7 @@ tr:hover { background:#f1f1f1; }
                 <th>Email</th>
                 <th>Matricule</th>
                 <th>Rôle</th>
-                <th>Classes/Services</th>
+                <th>Classe/Service</th>
                 <th>Photo</th>
                 <th>Actions</th>
             </tr>
@@ -101,22 +144,22 @@ tr:hover { background:#f1f1f1; }
         <tbody>
         <?php foreach ($users as $user): ?>
         <tr>
-            <td><?= htmlspecialchars($user['nom']) ?></td>
-            <td><?= htmlspecialchars($user['prenom']) ?></td>
-            <td><?= htmlspecialchars($user['email']) ?></td>
-            <td><?= htmlspecialchars($user['matricule']) ?></td>
-            <td><?= htmlspecialchars(ucfirst($user['type'])) ?></td>
-            <td><?= htmlspecialchars(libelles_ids($user['classe_id'], $all_classes)) ?></td>
+            <td><?php echo htmlspecialchars($user['nom']); ?></td>
+            <td><?php echo htmlspecialchars($user['prenom']); ?></td>
+            <td><?php echo htmlspecialchars($user['email']); ?></td>
+            <td><?php echo htmlspecialchars($user['matricule']); ?></td>
+            <td><?php echo htmlspecialchars(ucfirst($user['type'])); ?></td>
+            <td><?php echo htmlspecialchars($user['nom_classe'] ?: 'Aucune'); ?></td>
             <td>
-                <?php if ($user['photo_reference']): ?>
-                    <img src="../uploads/<?= htmlspecialchars($user['photo_reference']) ?>" style="height:40px;border-radius:8px;">
+                <?php if (!empty($user['photo_reference'])): ?>
+                    <img src="../uploads/<?php echo htmlspecialchars($user['photo_reference']); ?>" style="height:40px;border-radius:8px;">
                 <?php else: ?>
                     <span class="no-photo">Aucune</span>
                 <?php endif; ?>
             </td>
             <td>
-                <a href="modifier_utilisateur.php?id=<?= $user['id'] ?>" class="btn-connexion" style="padding:0.3rem 1rem;font-size:1rem;">Modifier</a>
-                <a href="supprimer_utilisateur.php?id=<?= $user['id'] ?>" class="btn-connexion" style="background:#d9534f;color:#fff;padding:0.3rem 1rem;font-size:1rem;" onclick="return confirm('Confirmer la suppression?');">Supprimer</a>
+                <a href="modifier_utilisateur.php?id=<?php echo $user['id']; ?>" class="btn-connexion" style="padding:0.3rem 1rem;font-size:1rem;">Modifier</a>
+                <a href="supprimer_utilisateur.php?id=<?php echo $user['id']; ?>" class="btn-connexion" style="background:#d9534f;color:#fff;padding:0.3rem 1rem;font-size:1rem;" onclick="return confirm('Confirmer la suppression?');">Supprimer</a>
             </td>
         </tr>
         <?php endforeach; ?>
@@ -206,6 +249,9 @@ function showNotification(message, type="success") {
 <?php endif; ?>
 <?php if(isset($_GET['deleted'])): ?>
 <script>showNotification("Utilisateur supprimé avec succès!", "success");</script>
+<?php endif; ?>
+<?php if(isset($_GET['updated'])): ?>
+<script>showNotification("Utilisateur modifié avec succès!", "success");</script>
 <?php endif; ?>
 
 </body>

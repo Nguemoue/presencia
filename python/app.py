@@ -71,7 +71,7 @@ def recognize():
 
         if results[0]:
             db.close()
-            return jsonify({"match": True, "person": person.nom}), 200
+            return jsonify({"match": True, "person": person.id}), 200
 
     db.close()
     return jsonify({"match": False}), 200

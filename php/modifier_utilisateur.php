@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 if (!isset($_SESSION['type']) || $_SESSION['type'] !== 'admin') {
@@ -7,16 +6,24 @@ if (!isset($_SESSION['type']) || $_SESSION['type'] !== 'admin') {
 }
 require_once '../includes/config.php';
 
-$id = $_GET['id'];
-if (!$id) { header('Location: liste_utilisateurs.php?error=id'); exit; }
+$id = $_GET['id'] ;
+if (!$id) {
+    header('Location: liste_utilisateurs.php?error=id');
+    exit;
+}
 
 // Récupérer les données de l’utilisateur
 $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$id]);
-$user = $stmt->fetch();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$user) {
-    header('Location: _utilisateurs.php?error=notfound'); exit;
+    header('Location: liste_utilisateurs.php?error=notfound');
+    exit;
 }
+
+// Charger toutes les classes
+$stmt = $pdo->query("SELECT * FROM classes ORDER BY nom_classe");
+$classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -27,14 +34,14 @@ if (!$user) {
 </head>
 <body>
   <label class="toggle-switch" title="Basculer mode clair/sombre">
-    <input type="checkbox" id="modeToggle">
-    Mode sombre
+    <input type="checkbox" id="modeToggle"> Mode sombre
   </label>
   <main>
     <div class="form-container">
       <h2>Modifier un utilisateur</h2>
       <form action="update_utilisateur.php" method="post" enctype="multipart/form-data" autocomplete="off">
         <input type="hidden" name="id" value="<?= $user['id'] ?>" />
+
         <label for="nom">Nom</label>
         <input type="text" name="nom" id="nom" value="<?= htmlspecialchars($user['nom']) ?>" required />
 
@@ -49,22 +56,22 @@ if (!$user) {
 
         <label for="type">Rôle</label>
         <select name="type" id="type" required>
-          <option value="etudiant"<?= $user['type']=='etudiant'?' selected':''; ?>>Étudiant</option>
-          <option value="personnel"<?= $user['type']=='personnel'?' selected':''; ?>>Personnel</option>
-          <option value="admin"<?= $user['type']=='admin'?' selected':''; ?>>Administrateur</option>
+          <option value="etudiant" <?= $user['type']=='etudiant'?'selected':''; ?>>Étudiant</option>
+          <option value="personnel" <?= $user['type']=='personnel'?'selected':''; ?>>Personnel</option>
+<option value="admin" <?= $user['type']=='admin'?'selected':''; ?>>Administrateur</option>
         </select>
-       </select>
 
-            <label for="classe_id">Classe / Service</label>
-            <select name="classe_id" id="classe_id" required>
-                <option value="" disabled selected>Choisir une classe</option>
-                <?php foreach ($classes as $classe): ?>
-                    <option value="<?= htmlspecialchars($classe['id']) ?>">
-                        <?= htmlspecialchars($classe['nom_classe']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-         <label for="photo_reference">Photo référence (laisser vide pour ne pas changer)</label>
+        <label for="classe_id">Classe / Service</label>
+        <select name="classe_id" id="classe_id" required>
+            <option value="" disabled>Choisir une classe</option>
+            <?php foreach ($classes as $classe): ?>
+                <option value="<?= $classe['id'] ?>" <?= ($classe['id'] == $user['classe_id']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($classe['nom_classe']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <label for="photo_reference">Photo référence (laisser vide pour ne pas changer)</label>
         <input type="file" name="photo_reference" id="photo_reference" accept="image/*" />
 
         <?php if ($user['photo_reference']): ?>
@@ -73,7 +80,7 @@ if (!$user) {
 
         <button type="submit">Modifier</button>
       </form>
-    </div>
+   </div>
   </main>
   <script src="../assets/js/app.js"></script>
 </body>

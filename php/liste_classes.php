@@ -42,6 +42,7 @@ $classes = $stmt->fetchAll();
     th.sortable:hover {
         text-decoration:underline;
     }
+      
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -76,11 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </head>
 <body>
-<label class="toggle-switch" title="Basculer mode clair/sombre">
-    <input type="checkbox" id="modeToggle">
-    Mode sombre
-</label>
-
 <main>
 <div class="form-container" style="max-width:1000px;">
     <h2>Liste des classes / services</h2>

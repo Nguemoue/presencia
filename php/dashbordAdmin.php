@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
+  
   <div class="sidebar">
     <div class="profile">
       <img src="../assets/img/admin_avatar.png" alt="Admin" class="avatar">
@@ -17,8 +18,8 @@
       <a href="liste_utilisateurs.php" class="nav-link"><i class="fas fa-users"></i> Utilisateurs</a>
       <a href="liste_classes.php" class="nav-link"><i class="fas fa-chalkboard"></i> Classes</a>
       <a href="liste_classes.php" class="nav-link"><i class="fas fa-briefcase"></i> Services</a>
-      <a href="dashboard.html" class="nav-link"><i class="fas fa-calendar-check"></i> Présences</a>
-      <a href="parametres.php" class="nav-link"><i class="fas fa-cogs"></i> Paramètres</a>
+      <a href="dash.php" class="nav-link"><i class="fas fa-calendar-check"></i> Présences</a>
+      <a href="chatt.php" class="nav-link"><i class="fas fa-cogs"></i> chatbot</a>
       <a href="logout.php" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
     </nav>
   </div>
@@ -47,13 +48,13 @@
           <i class="fas fa-briefcase"></i>
           <span>Services</span>
         </div>
-        <div class="card" onclick="redirect('dashboard.html')">
+        <div class="card" onclick="redirect('dash.php')">
           <i class="fas fa-calendar-check"></i>
           <span>Présences</span>
         </div>
-        <div class="card" onclick="redirect('parametres.php')">
+        <div class="card" onclick="redirect('chatt.php')">
           <i class="fas fa-cogs"></i>
-          <span>Paramètres</span>
+          <span>chatbot</span>
         </div>
       </div>
     </section>

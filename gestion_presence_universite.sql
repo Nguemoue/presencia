@@ -1,16 +1,10 @@
--- xampp-lite https://sourceforge.net/projects/xampplite/
+-- xampp-lite https://sourceforge.net/projects/xampplite/   
+--   
+-- MariaDB dump 10.17  Distrib 10.4.8-MariaDB, for Win32 (AMD64)
 --
--- mysqldump-php https://github.com/ifsnop/mysqldump-php
---
--- Host: localhost	Database: gestion_presence_universite
+-- Host: localhost    Database: gestion_presence_universite
 -- ------------------------------------------------------
--- Server version 	5.5.5-10.4.8-MariaDB
--- Date: Mon, 25 Aug 2025 18:55:42 +0200
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+-- Server version	10.4.8-MariaDB
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -25,52 +19,22 @@
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `classes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nom_classe` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `nom_classe` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `description` text COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `classes`
 --
 
-INSERT INTO `classes` (`id`, `nom_classe`, `description`) VALUES (1,'GL2','geni logiciel 1');
-INSERT INTO `classes` (`id`, `nom_classe`, `description`) VALUES (2,'SR1','systemes et reseaux 1');
-INSERT INTO `classes` (`id`, `nom_classe`, `description`) VALUES (3,'DISCIPLINE','RETARDS,PRESENCES ET ABSENCES');
-INSERT INTO `classes` (`id`, `nom_classe`, `description`) VALUES (4,'sr4','systeme et reseaux');
-INSERT INTO `classes` (`id`, `nom_classe`, `description`) VALUES (5,'sr3','systemes et reseaux');
-INSERT INTO `classes` (`id`, `nom_classe`, `description`) VALUES (6,'gl4','genie logiciel');
-INSERT INTO `classes` (`id`, `nom_classe`, `description`) VALUES (7,'finance','argent');
-
--- Dumped table `classes` with 7 row(s)
---
-
---
--- Table structure for table `historique_connexion`
---
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `historique_connexion` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `date_connexion` datetime NOT NULL,
-  `ip_adresse` varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `historique_connexion_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `historique_connexion`
---
-
-
--- Dumped table `historique_connexion` with 0 row(s)
---
+INSERT INTO `classes` VALUES (1,'GL2','genie logiciel');
+INSERT INTO `classes` VALUES (2,'finance','administration');
+INSERT INTO `classes` VALUES (3,'sr1','systemes et reseaux');
+INSERT INTO `classes` VALUES (4,'S I 2','software ingeneering');
+INSERT INTO `classes` VALUES (6,'sr2','systemes et reseaux');
 
 --
 -- Table structure for table `periode`
@@ -79,21 +43,25 @@ CREATE TABLE `historique_connexion` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `periode` (
-  `id_periode` int(11) NOT NULL AUTO_INCREMENT,
+  `id_periode` int(11) NOT NULL,
   `nom_periode` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `heure_debut` time DEFAULT NULL,
   `heure_fin` time DEFAULT NULL,
   PRIMARY KEY (`id_periode`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `periode`
 --
 
-
--- Dumped table `periode` with 0 row(s)
---
+INSERT INTO `periode` VALUES (5,'entree','07:00:00','07:45:00');
+INSERT INTO `periode` VALUES (6,'premiere periode','07:30:00','09:30:00');
+INSERT INTO `periode` VALUES (7,'deuxieme periode','09:30:01','11:30:00');
+INSERT INTO `periode` VALUES (8,'troisieme periode','12:45:00','14:45:00');
+INSERT INTO `periode` VALUES (10,'quatrieme periode','14:45:01','16:45:00');
+INSERT INTO `periode` VALUES (11,'sortie','16:45:01','16:50:00');
+INSERT INTO `periode` VALUES (12,'pause','11:31:11','12:44:12');
 
 --
 -- Table structure for table `presence`
@@ -102,28 +70,32 @@ CREATE TABLE `periode` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `presence` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `date_heure` int(11) NOT NULL,
-  `id_periode` int(11) NOT NULL,
-  `statut` enum('present','absent') COLLATE utf8_unicode_ci NOT NULL,
-  `image_reference` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `date_heure` datetime NOT NULL,
+  `statut` enum('present','absent','retard') COLLATE utf8_unicode_ci NOT NULL,
+  `id_periode` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_presences_user_id` (`user_id`),
-  KEY `fk_id_periode` (`id_periode`),
-  CONSTRAINT `fk_id_periode` FOREIGN KEY (`id_periode`) REFERENCES `periode` (`id_periode`),
+  KEY `user_id` (`user_id`),
+  KEY `id_periode` (`id_periode`),
   CONSTRAINT `presence_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `presence_ibfk_2` FOREIGN KEY (`id_periode`) REFERENCES `periode` (`id_periode`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  CONSTRAINT `presence_ibfk_2` FOREIGN KEY (`id_periode`) REFERENCES `periode` (`id_periode`) ON DELETE SET NULL
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `presence`
 --
 
-
--- Dumped table `presence` with 0 row(s)
---
+INSERT INTO `presence` VALUES (1,1,'2025-09-03 16:19:20','present',10);
+INSERT INTO `presence` VALUES (2,1,'2025-09-04 08:42:56','present',6);
+INSERT INTO `presence` VALUES (3,2,'2025-09-13 13:03:37','present',8);
+INSERT INTO `presence` VALUES (4,2,'2025-09-17 09:16:55','present',6);
+INSERT INTO `presence` VALUES (5,3,'2025-09-17 09:34:03','present',7);
+INSERT INTO `presence` VALUES (6,1,'2025-09-18 10:19:15','present',7);
+INSERT INTO `presence` VALUES (7,1,'2025-09-18 12:45:54','present',8);
+INSERT INTO `presence` VALUES (8,4,'2025-09-22 11:55:23','present',12);
+INSERT INTO `presence` VALUES (9,4,'2025-09-22 14:25:47','present',8);
 
 --
 -- Table structure for table `users`
@@ -132,45 +104,37 @@ CREATE TABLE `presence` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `nom` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `prenom` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `email` varchar(150) COLLATE utf8_unicode_ci NOT NULL,
   `mot_de_passe` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `type` enum('etudiant','personnel','admin') COLLATE utf8_unicode_ci NOT NULL,
   `photo_reference` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  face_encoding blob         not null,
   `classe_id` int(11) DEFAULT NULL,
   `matricule` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
+  `created_at` datetime DEFAULT NULL,
+  `face_encoding` blob DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `classe_id` (`classe_id`),
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`classe_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `mot_de_passe`, `type`, `photo_reference`, `classe_id`, `matricule`, `created_at`) VALUES (3,'Martin','Alice','alicemartin@gmail.com','$2y$10$V0Fv7T3ZkWq38x61YqU1euNeMVFAcuGhaXssqdcKuhKdofwDsmqr.','admin',NULL,3,'ADM2025001','2025-08-11 23:31:30');
-INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `mot_de_passe`, `type`, `photo_reference`, `classe_id`, `matricule`, `created_at`) VALUES (4,'bonjawo','jaques','jac@gmail.com','$2y$10$sj4i.Pt4k0rGv9N3.53wHOcR6OdqQY.jfsazfmsuGr18LZpqbmFum','etudiant','photo_689f45458b34b.jpg',NULL,'ADM2025002','2025-08-12 17:51:41');
-INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `mot_de_passe`, `type`, `photo_reference`, `classe_id`, `matricule`, `created_at`) VALUES (5,'hankou','raissa','hankou@gmail.com','$2y$10$sCYAxOaOXmrUVTc8rmYeOOyz0gxiK/vdryP3RWan/FKE2z1YqFZiG','admin','photo_689b76be3a5ce.jpg',1,'ADM2025004','2025-08-12 18:15:42');
-INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `mot_de_passe`, `type`, `photo_reference`, `classe_id`, `matricule`, `created_at`) VALUES (6,'KAMEGA ','SIMON','kamega@gmail.com','$2y$10$4hqvDaxrCYLFlUSgWF.gyeqxGp.HFSxRYIIVNjyZWuJSx220.5G5q','personnel','photo_689b7f27c6db6.jpg',1,'MAT202502','2025-08-12 18:51:35');
-INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `mot_de_passe`, `type`, `photo_reference`, `classe_id`, `matricule`, `created_at`) VALUES (7,'Mbakop','rachel','rachel@gmail.com','$2y$10$9ahAPLOP4rcIgFWI93KfxuilpLhmvhUzwF64Me9yeZ6NlXwQoEd9e','admin','photo_68ab2a436375a.jpg',7,'admin125','2025-08-24 16:05:39');
-INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `mot_de_passe`, `type`, `photo_reference`, `classe_id`, `matricule`, `created_at`) VALUES (23,'bonne','nouvelle','bonne@gmail.com','$2y$10$NQA0kpPDCwLQuRi2iYeZWeBAQj1Fltvy9M0txiNoPY6i76FoeXk8u','admin',NULL,7,'bonneADM','2025-08-24 17:05:44');
-
--- Dumped table `users` with 6 row(s)
---
-
+INSERT INTO `users` VALUES (1,'Nkengafac','joel','joelnkengafac616@gmail.com','$2y$10$A4zceuQCIYEgO2b0FWh3dOSyqRW0ST.ZOIazJSYp6DapguXELkR2S','etudiant','user_68b8589716498.jpg',1,'etu001','2025-09-03 16:02:47','Äïã\0\0\0\0\0\0ånumpy.core.multiarrayîå_reconstructîìîånumpyîåndarrayîìîK\0ÖîCbîáîRî(KKÄÖîhådtypeîìîåf8îâàáîRî(Kå<îNNNJˇˇˇˇJˇˇˇˇK\0tîbâB\0\0\0\0\0\0†Wk»ø\0\0\0\0Ãîæ?\0\0\0Äaªö?\0\0\0‡∆ßù?\0\0\0‡!E}ø\0\0\0@-ù£ø\0\0\0Äù!ø?\0\0\0¿¡Qvø\0\0\0\0bÀƒ?\0\0\0Ä18£ø\0\0\0 ¢ÛŒ?\0\0\0`Ω±à?\0\0\0†ÈŸ≈ø\0\0\0 R“∏ø\0\0\0\0\n?ß?\0\0\0‡|ß¡?\0\0\0@ö≈ø\0\0\0†Aª∫ø\0\0\0¿£æ¬ø\0\0\0`ÂG√ø\0\0\0\0ô°ø\0\0\0Äû?\0\0\0†€Ûâø\0\0\0Ä≈ﬂ±?\0\0\0Äy®ºø\0\0\0¿©Ïœø\0\0\0Änµø\0\0\0‡‚Ø»ø\0\0\0†}å∞?\0\0\0\0@ã≈ø\0\0\0¿¨íï?\0\0\0 >ë?\0\0\0†C∞«ø\0\0\0 ~›≤ø\0\0\0†¥l¨ø\0\0\0Ä‘ê?\0\0\0ÄDË•?\0\0\0Äﬁ—kø\0\0\0†ˆ™¿?\0\0\0¿~≤?\0\0\0`õ`µø\0\0\0@[Ÿn?\0\0\0¿Ô\"âø\0\0\0@%ø“?\0\0\0 X√?\0\0\0Ä£Êóø\0\0\0\0≈C?\0\0\0‡£ìÅ?\0\0\0\0P ¥?\0\0\0\0¨°Õø\0\0\0‡?ÏÇ?\0\0\0\0À≤?\0\0\0@ËŸƒ?\0\0\0`í†±?\0\0\0@ãÆÑ?\0\0\0 €R¿ø\0\0\0¿ï£ø\0\0\0†\'Ë£?\0\0\0@ÒÖ√ø\0\0\0 \r›Ω?\0\0\0 MR´?\0\0\0Äc%πø\0\0\0ÄEûΩø\0\0\0†\\,üø\0\0\0\0zπÀ?\0\0\0‡Ãkª?\0\0\0@ü¯∏ø\0\0\0Äa»πø\0\0\0`u˚Õ?\0\0\0`iŸªø\0\0\0¿°äø\0\0\0@ä	¥?\0\0\0Ä2∂µø\0\0\0`r[¬ø\0\0\0`1ÉÀø\0\0\0\0∆?\0\0\0 áG÷?\0\0\0`Ñ¬?\0\0\0\0 ‰¬ø\0\0\0Ä”◊e?\0\0\0`^≥Àø\0\0\0†˝º©?\0\0\0Ä“{∫ø\0\0\0¿ˇ/ß?\0\0\0¿ˆ}¿ø\0\0\0\0Aü?\0\0\0†Ë\Zπø\0\0\0ÄˆO±?\0\0\0Äï∆Ω?\0\0\0\0}L§?\0\0\0†°õø\0\0\0\0¯ø…?\0\0\0@ı§ø\0\0\0 ©û?\0\0\0\0òVô?\0\0\0‡Òoúø\0\0\0Ä™¿Æø\0\0\0¿xäµø\0\0\0†Û¶ø\0\0\0 åÕ§ø\0\0\0ÄëP∞?\0\0\0@]í≈ø\0\0\0ÄΩaÖø\0\0\0\0Tµ?\0\0\0\0V\r√ø\0\0\0Äã√?\0\0\0`ıŒüø\0\0\0\0 Õ?\0\0\0\0˝vïø\0\0\0@+}ª?\0\0\0ÄÌx°ø\0\0\0Ä‰î?\0\0\0`Àƒ?\0\0\0†p<»ø\0\0\0†yÕ?\0\0\0†uË∆?\0\0\0 .Nõø\0\0\0†!ŸΩ?\0\0\0ÄôÇò?\0\0\0\07¿?\0\0\0‡ì≠µø\0\0\0ÄÜ\nÑø\0\0\0@ÔW¡ø\0\0\0¿’ ≠ø\0\0\0@p∏©?\0\0\0 oƒ≠ø\0\0\0\0%ly?\0\0\0¿]Ä§?îtîb.');
+INSERT INTO `users` VALUES (2,'JOJO','njualem','jojo@gmail.com','$2y$10$lb/r96FxUm9XjKYpdMQOKebKtIQnA/xHrPnbxxtvp5L31Ag3MVDr.','admin','user_68b859d0c0ad3.jpg',2,'ADM001','2025-09-03 16:08:00','Äïã\0\0\0\0\0\0ånumpy.core.multiarrayîå_reconstructîìîånumpyîåndarrayîìîK\0ÖîCbîáîRî(KKÄÖîhådtypeîìîåf8îâàáîRî(Kå<îNNNJˇˇˇˇJˇˇˇˇK\0tîbâB\0\0\0\0\0\0†«≥œø\0\0\0`Ú‘æ?\0\0\0¿◊õ?\0\0\0 ﬂ—®?\0\0\0@)<áø\0\0\0`>êø\0\0\0@Y≈π?\0\0\0@∆á?\0\0\0`“k¿?\0\0\0@j=Ü?\0\0\0‡fk ?\0\0\0\0–Ï:?\0\0\0¿˝/ ø\0\0\0 ?ªø\0\0\0†åÑ≤?\0\0\0ÄwûΩ?\0\0\0†7∂Ãø\0\0\0¿ÜO≥ø\0\0\0 Å7πø\0\0\0†‰æø\0\0\0@¶ä?\0\0\0`éöò?\0\0\0‡Œ!ìø\0\0\0 àx¥?\0\0\0\0!¬ø\0\0\0¿ú∑–ø\0\0\0¿%Vùø\0\0\0†\rúÃø\0\0\0‡æë∏?\0\0\0†lˆΩø\0\0\0`˛Ñ?\0\0\0††˚i?\0\0\0`_Ê»ø\0\0\0¿»∞ßø\0\0\0`/¨Øø\0\0\0@Féø\0\0\0\0¢îç?\0\0\0\0!góø\0\0\0Ä èæ?\0\0\0 îÄ™?\0\0\0¿Äâ¥ø\0\0\0\0\\ôø\0\0\0\0kZûø\0\0\0@8Œ“?\0\0\0†Ö¿…?\0\0\0`%£ø\0\0\0Ä\0P~ø\0\0\0¿F®qø\0\0\0`b%±?\0\0\0@†ïŒø\0\0\0 πû™ø\0\0\0¿9Ö¥?\0\0\0\0Ä4≈?\0\0\0¿òÇµ?\0\0\0‡*Aöø\0\0\0ÄÛ-√ø\0\0\0\0Xúb?\0\0\0ÄöÇòø\0\0\0†¯e…ø\0\0\0 *Mª?\0\0\0¿–Z°?\0\0\0\0§`¿ø\0\0\0‡∏a≤ø\0\0\0 âc?\0\0\0¿Ú–?\0\0\0†bC≥?\0\0\0`i…∫ø\0\0\0 ∂1πø\0\0\0†πÃ?\0\0\0@\Z˚æø\0\0\0\0¸Z?\0\0\0†\r˘µ?\0\0\0¿é`±ø\0\0\0\0ôπ√ø\0\0\0@cxÃø\0\0\0@¡?\0\0\0\0-î’?\0\0\0@pVƒ?\0\0\0¿ô∏«ø\0\0\0\0ê≈y?\0\0\0‡Âe–ø\0\0\0Äπü£?\0\0\0¿\Z§ø\0\0\0‡ d∑?\0\0\0¿^æø\0\0\0\0úyëø\0\0\0@è¶∏ø\0\0\0@˚Çß?\0\0\0\0i*æ?\0\0\0†ÀÇ?\0\0\0`¬ﬂîø\0\0\0¿ ¶Õ?\0\0\0@\\Ó°?\0\0\0\0gt?\0\0\0`î£?\0\0\0¿á¨ø\0\0\0¿f†∞ø\0\0\0‡ÇÆ≤ø\0\0\0 >ñø\0\0\0†;°™ø\0\0\0`Ñ†?\0\0\0Ä…ƒø\0\0\0`ÏÙ©?\0\0\0 1ƒπ?\0\0\0`k+√ø\0\0\0Ä˙¥√?\0\0\0‡˝òï?\0\0\0Ä~X}?\0\0\0 Ωé?\0\0\0‡k∞?\0\0\0Ä°»•ø\0\0\0Ä;ªÄø\0\0\0\0C¯æ?\0\0\0 ˝⁄Õø\0\0\0 ∑Ã?\0\0\0\0^•≈?\0\0\0Ä®>¢?\0\0\0‡¨6¬?\0\0\0\0Ω⁄k?\0\0\0¿GFº?\0\0\0`®ƒ∑ø\0\0\0@Œúë?\0\0\0`4òªø\0\0\0@òØtø\0\0\0 É∞?\0\0\0@°ˇ©ø\0\0\0¿µst?\0\0\0`v°?îtîb.');
+INSERT INTO `users` VALUES (3,'nkonlack','gaelle','archangenzouelebo@gmail.com','$2y$10$vMz358zWd01TYJiNuZx1O.17jeUYXHddzEgLtddcSApwLnwIHBWt6','personnel','photo_68ca6fe59381c.jpg',2,'etu002','2025-09-17 09:14:38',NULL);
+INSERT INTO `users` VALUES (4,'toukam','erika','toukam@gmail.com','$2y$10$l6AXgqGacFRwZiSzBuR8E.bGWqfeMeoSRTBV7fiy1R3sVDXa/qrcy','personnel','user_68d12abf827b0.jpg',2,'perso001','2025-09-22 11:53:51','Äïã\0\0\0\0\0\0ånumpy.core.multiarrayîå_reconstructîìîånumpyîåndarrayîìîK\0ÖîCbîáîRî(KKÄÖîhådtypeîìîåf8îâàáîRî(Kå<îNNNJˇˇˇˇJˇˇˇˇK\0tîbâB\0\0\0\0\0\0‡&¡ø\0\0\0 M∞?\0\0\0Ä°?≥?\0\0\0†ªÖºø\0\0\0`¢∂ºø\0\0\0@Îbµø\0\0\0\0xﬁo?\0\0\0‡|\'∏ø\0\0\0@{0∆?\0\0\0`PÍ¿ø\0\0\0¿ãgœ?\0\0\0 2{ºø\0\0\0\07˙…ø\0\0\0¿xk§ø\0\0\0`*•§ø\0\0\0@Ê•Ã?\0\0\0`ls≈ø\0\0\0ÄÅü≈ø\0\0\0@AÚ±ø\0\0\0\0‡ó∞ø\0\0\0†ß©ì?\0\0\0\0.∂c?\0\0\0`Gœ¢ø\0\0\0 <Dƒ?\0\0\0¿¢5Åø\0\0\0\0ß„‘ø\0\0\0‡¥ÛΩø\0\0\0¿Õæ¡ø\0\0\0¿õT?\0\0\0ÄE_?\0\0\0Ä:sqø\0\0\0Ä¯˝º?\0\0\0\0ï,»ø\0\0\0 óÍêø\0\0\0Ä‰ îø\0\0\0 ¡üÉ?\0\0\0 >Æ±?\0\0\0 ê°ø\0\0\0¿_!√?\0\0\0\0π,üø\0\0\0‡™Àø\0\0\0`Åô¥ø\0\0\0 µ+¡?\0\0\0 b•À?\0\0\0¿’¯π?\0\0\0¿U°ò?\0\0\0Ä¯˝ù?\0\0\0Äıˆaø\0\0\0‡ÊÄê?\0\0\0`#ïƒø\0\0\0‡s©ø\0\0\0ÄK€π?\0\0\0¿H»≈?\0\0\0@º»Ø?\0\0\0@ñ@ïø\0\0\0`®›Ãø\0\0\0¿◊%ùø\0\0\0¿K-∂?\0\0\0`; »ø\0\0\0Ä¢U™?\0\0\0ÄÅ5ìø\0\0\0 m1ºø\0\0\0†µ§µø\0\0\0‡=´ªø\0\0\0\0ÎK◊?\0\0\0 9¡¡?\0\0\0\0nƒø\0\0\0\0	÷ƒø\0\0\0‡ïM»?\0\0\0‡!N≈ø\0\0\0†ß‹∞ø\0\0\0\0§|™?\0\0\0‡+…ø\0\0\0`⁄¢¿ø\0\0\0‡™Ì”ø\0\0\0\0óXî?\0\0\0Äƒo”?\0\0\0 Ï√∑?\0\0\0‡·”√ø\0\0\0¿í+±?\0\0\0¿sÁøø\0\0\0‡ôû?\0\0\0‡˙£Æø\0\0\0@ƒÇ∫?\0\0\0\0\'$≤ø\0\0\0Äª.π?\0\0\0‡S¨∞ø\0\0\0‡…êø\0\0\0@`\0≈?\0\0\0Ä•:µø\0\0\0@ß£Ç?\0\0\0†m∑À?\0\0\0‡7û™ø\0\0\0ÄEpû?\0\0\0@Ã%≥ø\0\0\0¿˚—óø\0\0\0\0—\\ø\0\0\0Ä*±¶ø\0\0\0Ä˜¬ø\0\0\0\0áõ?\0\0\0 \nΩØø\0\0\0†µ∆ùø\0\0\0‡oôø\0\0\0Äˆùù?\0\0\0†R◊ ø\0\0\0‡Êûwø\0\0\0\0™¡ë?\0\0\0\0¢P¶ø\0\0\0‡Òøø\0\0\0Äçíº?\0\0\0@≥¿ø\0\0\0\06Üªø\0\0\0†õL≈?\0\0\0`iõÀø\0\0\0`v…?\0\0\0\0Æ·À?\0\0\0`|µ?\0\0\0†ıKƒ?\0\0\0\0∫‚∂?\0\0\0†go≥?\0\0\0‡z±Ñø\0\0\0†√Ø∑ø\0\0\0†¶Ú∂ø\0\0\0@niöø\0\0\0¿Õ¿∆?\0\0\0Äzç≤ø\0\0\0\0Zﬂ¶?\0\0\0‡,Ø?îtîb.');
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on: Mon, 25 Aug 2025 18:55:42 +0200
+-- Dump completed on 2025-09-23  9:38:02

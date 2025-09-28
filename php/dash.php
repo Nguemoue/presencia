@@ -705,7 +705,7 @@ try {
                             <input type="date" id="date-fin" name="date_fin" value="<?php echo $filters['date_fin']; ?>">
                         </div>
                         <div class="filter-item">
-                            <label for="classe_id">Classe</label>
+                            <label for="classe_id">Classe/service</label>
                             <select id="classe_id" name="classe_id">
                                 <option value="">Toutes les classes</option>
                                 <?php foreach ($classes as $classe): ?>
@@ -715,15 +715,7 @@ try {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="filter-item">
-                            <label for="service">Service</label>
-                            <select id="service" name="service">
-                                <option value="">Tous les services</option>
-                                <option value="administration" <?php echo $filters['service'] == 'administration' ? 'selected' : ''; ?>>Administration</option>
-                                <option value="enseignement" <?php echo $filters['service'] == 'enseignement' ? 'selected' : ''; ?>>Enseignement</option>
-                                <option value="technique" <?php echo $filters['service'] == 'technique' ? 'selected' : ''; ?>>Technique</option>
-                            </select>
-                        </div>
+                        
                         <div class="filter-item">
                             <label for="type-utilisateur">Type d'utilisateur</label>
                             <select id="type-utilisateur" name="type_utilisateur">

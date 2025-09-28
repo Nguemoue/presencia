@@ -60,7 +60,7 @@ if($httpcode === 200 && $response) {
         // Vérifier si déjà pointé cette période
         $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM presence WHERE user_id =? AND id_periode =?");
         $stmtCheck->execute([$personId, $periode]);
-        if($stmtCheck->fetchColumn() > 0) {
+        if($stmtCheck->fetchColumn() > 1) {
             echo json_encode(["success" => false, "message" => "Tu as déjà pointé cette période."]);
             exit;
         }

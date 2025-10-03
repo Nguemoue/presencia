@@ -10,7 +10,7 @@ $password = $_POST['password'] ;
 $role = $_POST['role'] ;
 
 if (!$matricule || !$password || !$role) {
-    header('Location: ../login.html?error=champs');
+    header('Location: ../login.php?error=champs');
     exit;
 }
 
@@ -38,9 +38,9 @@ if ($user && password_verify($password, $user['mot_de_passe'])) {
     
     // Redirection selon le rôle
    if ($user['type'] === 'etudiant') {
-            header('Location: dashboard.html');
+            header('Location: dashboard.php');
    }elseif($user['type'] === 'personnel') {
-            header('Location: dashboard.html');
+            header('Location: dashboard.php');
  }elseif($user['type'] === 'admin') {
             header('Location: dashbordAdmin.php');
  }

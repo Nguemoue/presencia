@@ -1,3 +1,12 @@
+<?php
+session_start();
+if(!isset($_SESSION["user_id"])){
+    #user is not loggws
+    header("Location: ../login.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>

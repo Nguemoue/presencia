@@ -1,3 +1,13 @@
+<?php
+session_start();
+include("../includes/config.php");
+if(!isset($_SESSION["user_id"])){
+    #user is not loggws
+    header("Location: ../login.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -355,7 +365,7 @@
             Pointer sa présence
           </h3>
           <p>Enregistrez rapidement votre présence en cours avec un système simple et efficace. Un clic suffit pour confirmer votre participation.</p>
-          <a href="pointage.html" class="feature-link">
+          <a href="pointage.php" class="feature-link">
             Prendre présence
             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>

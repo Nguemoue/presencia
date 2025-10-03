@@ -8,7 +8,7 @@ session_destroy();
 <head>
   <meta charset="UTF-8">
   <title>Déconnexion</title>
-  <meta http-equiv="refresh" content="4;url=../login.html"> <!-- Redirection automatique -->
+  <meta http-equiv="refresh" content="4;url=../login.php"> <!-- Redirection automatique -->
   <style>
     body {
       font-family: Arial, sans-serif;

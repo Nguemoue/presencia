@@ -823,7 +823,7 @@ try {
                                     <td><?php echo $row['prenom']; ?></td>
                                     <td><?php echo ucfirst($row['type_utilisateur']); ?></td>
                                     <td><?php echo !empty($row['nom_classe']) ? $row['nom_classe'] : 'N/A'; ?></td>
-                                    <td><?php echo date('d/m/Y', strtotime($row['date_heure'])); ?></td>
+                                    <td><?php echo date('d/m/Y \a H:i', strtotime($row['date_heure'])); ?></td>
                                     <td><?php echo $row['nom_periode']; ?></td>
                                     <td>
                                         <?php

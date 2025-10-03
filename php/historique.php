@@ -765,28 +765,26 @@ try {
             <!-- Stats Section -->
             <div class="stats-grid">
                 <div class="stat-card present fade-in delay-2">
-                    <div class="stat-icon">✓</div>
+                    
                     <div class="stat-value"><?php echo $presents_pourcentage; ?>%</div>
                     <div class="stat-label">Taux de présence</div>
                     <small><?php echo $stats['presents']; ?> présences</small>
                 </div>
                 
                 <div class="stat-card absent fade-in delay-2">
-                    <div class="stat-icon">✗</div>
+                    
                     <div class="stat-value"><?php echo $absents_pourcentage; ?>%</div>
                     <div class="stat-label">Taux d'absence</div>
                     <small><?php echo $stats['absents']; ?> absences</small>
                 </div>
                 
                 <div class="stat-card late fade-in delay-3">
-                    <div class="stat-icon">⌛</div>
                     <div class="stat-value"><?php echo $retards_pourcentage; ?>%</div>
                     <div class="stat-label">Taux de retard</div>
                     <small><?php echo $stats['retards']; ?> retards</small>
                 </div>
                 
                 <div class="stat-card total fade-in delay-3">
-                    <div class="stat-icon">📅</div>
                     <div class="stat-value"><?php echo $total; ?></div>
                     <div class="stat-label">Total enregistrements</div>
                     <small>Sur la période sélectionnée</small>
@@ -888,7 +886,7 @@ try {
                         <?php if (count($historique) > 0): ?>
                             <?php foreach ($historique as $row): ?>
                                 <tr>
-                                    <td><?php echo date('d/m/Y', strtotime($row['date_heure'])); ?></td>
+                                    <td><?php echo date('d/m/Y \a H:i', strtotime($row['date_heure'])); ?></td>
                                     <td><?php echo htmlspecialchars($row['nom_periode']); ?></td>
                                     <td><?php echo date('H:i', strtotime($row['date_heure'])); ?></td>
                                     <td>

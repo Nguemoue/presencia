@@ -2,7 +2,7 @@
 <?php
 // Paramètres de connexion (à personnaliser selon ton hébergement)
 $host = 'localhost';
-$dbname = 'presencia';
+$dbname = 'gestion_presence_universite';
 $user = 'root';
 $pass = '';
 

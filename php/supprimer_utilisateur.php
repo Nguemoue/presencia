@@ -2,7 +2,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['type']) || $_SESSION['type'] !== 'admin') {
-    header('Location: ../login.html?error=acces');
+    header('Location: ../login.php?error=acces');
     exit;	
 }
 require_once '../includes/config.php';

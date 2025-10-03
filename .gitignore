@@ -38,7 +38,6 @@ composer.lock
 *.class
 
 # SQL dumps
-*.sql
 *.sqlite
 
 # IDEs and editors
